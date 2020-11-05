@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Nuke Simulation</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+<style>
+
+
+  
+      body { margin:0; padding:0; }
+
+      #map{
+            width: 1350px;
+            height:610px;
+            
+      }
+
+      .legend {
+        
+          line-height: 50px;
+          color:rgb(254, 251, 251);
+          font-size: 25px;
+      }
+      .legend i {
+          width: 18px;
+          height: 30px;
+          float: left;
+          margin-right: 8px;
+          opacity: 1;
+      }
+      .info {
+        padding: 6px 8px;
+        font: 14px/16px Arial, Helvetica, sans-serif;
+        background: rgba(252, 251, 251, 0.447);
+        background: rgb(255, 255, 255),200;
+        box-shadow: 0 0 15px rgba(145, 13, 13, 0.2);
+        border-radius: 5px;
+    }
+    .info h4 {
+        margin: 0 0 5px;
+        color: #777;
+    }
+
+    .leaflet-popup {
+        position: relative;
+        text-align: center;
+    }
+    .leaflet-popup-tip-container {
+
+        width: 0.05px;
+        height: 0.05px;
+        position: relative;
+        left: 50%;
+        top: -117px;
+        margin-left: -20px;
+        overflow: hidden;
+        pointer-events: none;
+        transform: rotate(180deg);
+        overflow-anchor: 0;
+    }
+
+      
+</style>
+</head>
+<body>
+  
+
+<p>
+  <div id='map'>
+ 
+  </div>
+</p>
+<span style="font-family: Arial, Helvetica, sans-serif;">
+  &nbsp;&nbsp;&nbsp;&nbsp; What if it happens at:&nbsp;&nbsp; <button id="nk">North Korea</button>&nbsp;&nbsp; <button id="ir">Iran</button>&nbsp;&nbsp; <button id="ws">Washington, D.C.</button>&nbsp;&nbsp; <button id="ny">New York City</button>&nbsp;&nbsp; <button id="backto">Back to Your Location</button>
+</span>
+
+
+
+<script>
+            const button1 = document.getElementById('nk');
+            const button2 = document.getElementById('ir');
+            const button3 = document.getElementById('ws');
+            const button4 = document.getElementById('ny');
+            const button5 = document.getElementById('backto');
+
+if('geolocation' in navigator) {
+        console.log('geolocation available');
+        navigator.geolocation.getCurrentPosition(async position => {
+            console.log(position);
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+        //     var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+	 	    // osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	 	    // osm = L.tileLayer(osmUrl, {
+	 	    //     maxZoom: 18,
+	 	    //     attribution: osmAttrib
+         // });
+         
+         L.mapbox.accessToken = 'pk.eyJ1Ijoid2lsbGF0Z3Jvd3NxdWFyZXNkb3Rjb20iLCJhIjoiY2tmN2N6aWo0MDE3eDJ3b2J2dHEwZXI4aSJ9.96N1pTooGEqxyEyxEEc06Q';
+
+              var map = L.map('map',{
+                attributionControl:false,
+                center:[lat,lon],
+                zoom:12,
+                minZoom:7,
+                maxZoom:22,
+                zoomControl:true
+              });
+
+
+              const attribution =
+                  '© <a href="https://apps.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+                  // https://api.mapbox.com/styles/v1/kawoyi/ckh0ayibw1ulr19qmrtrpl7rv/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2F3b3lpIiwiYSI6ImNrOW53M2ZwczA2bm0zZG9ibDBsbHEzZXIifQ.tfW-Y3_w0xXZxf_V9Eg2DQ
+                    const tileUrl = 'https://api.mapbox.com/styles/v1/kawoyi/ckh3f3fag0o0h19mgchkv5g8p/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoia2F3b3lpIiwiYSI6ImNrOW53M2ZwczA2bm0zZG9ibDBsbHEzZXIifQ.tfW-Y3_w0xXZxf_V9Eg2DQ';
+                    const tiles = L.tileLayer(tileUrl, { 
+                      attribution,
+                      maxZoom:22,
+                      maxNativeZoom:19 
+                    });
+
+              tiles.addTo(map);
+
+
+              
+              L.control.scale({
+                metric:true,
+                imperial: false,
+                position: 'topright',
+              }).addTo(map);
+              var circleLayer=L.circle([lat,lon]);
+
+              var legend = L.control({position: 'bottomright'});
+
+              legend.onAdd = function (map) {
+
+
+              var div = L.DomUtil.create('div', 'info legend');
+                
+
+                div.innerHTML ='What would happen if a nuke went off at your location ?<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Hover the Circles)';
+              return div;
+              };
+
+              legend.addTo(map);
+
+	function getMap(lat,lon){
+      var bufferDistance = [6327,3566,2141,776];
+      var color = ['#fb6a4a','#cc4c02','#cb181d','#67000d'];
+      var term=['Heat','Shock Wave','Radiation','Fireball'];
+
+      for (var i = 0; i < 4; i++) {
+        circleLayer = L.circle([lat, lon], bufferDistance[i], {
+          color: false,
+          weight: 1,
+          fillColor: color[i],
+          fillOpacity: 0.3,
+          //riseOnHover: true
+        }).addTo(map);
+        circleLayer.on('mouseover', function(e) {
+          e.target.bringToFront(); 
+          // delay(1000);
+          // e.target.bringToBack();       
+        });
+        circleLayer.on('mouseout', function(e) {
+          // e.target.bringToFront(); 
+          // // delay(1000);
+          e.target.bringToBack();       
+        });
+        circleLayer.addTo(map);
+        circleLayer.bindPopup("c fireball."+bufferDistance[i]);
+        
+        circleLayer.bindPopup("The Radius of "+term[i]+' : '+''+bufferDistance[i]+' meters.',{
+          offset: [300, 0]
+          
+        });
+
+        circleLayer.on('mouseover', function (e) {
+              this.openPopup();
+          });
+          circleLayer.on('mouseout', function (e) {
+              this.closePopup();
+          });
+        }
+        var circle = new L.Circle([lat,lon], 80).addTo(map);
+        var marker=L.marker([lat,lon]).addTo(map);
+     }
+    
+     getMap(lat,lon);
+
+     
+    // var circle = new L.Circle([lat,lon], 40).addTo(map); 
+    
+    button1.addEventListener('click', async event =>{
+                
+                map.flyTo([39.0392, 125.7625], 12)
+                map.removeLayer(circleLayer); 
+                
+                getMap(39.0392, 125.7625);
+    });
+    button2.addEventListener('click', async event =>{
+      
+                map.flyTo([32.4279, 53.6880], 12)
+                map.removeLayer(circleLayer); 
+                
+                getMap(32.4279, 53.6880);
+    });
+
+    button3.addEventListener('click', async event =>{
+      
+      map.flyTo([38.9072, -77.0369], 12)
+      map.removeLayer(circleLayer); 
+      
+      getMap(38.9072, -77.0369);
+    });
+
+    button4.addEventListener('click', async event =>{
+      
+      map.flyTo([40.7128, -74.0060], 12)
+      map.removeLayer(circleLayer); 
+      
+      getMap(40.7128, -74.0060);
+    });
+
+    button5.addEventListener('click', async event =>{
+        map.flyTo([lat,lon], 12)
+        map.removeLayer(circleLayer); 
+        getMap(lat,lon);
+
+      });
+
+
+            
+    });
+    }
+
+
+</script>
+
+
+</body>
+</html>
+
